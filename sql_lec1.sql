@@ -26,7 +26,7 @@ ORDER BY score  ASC;
 
 -- NESTED SORTING
 SELECT *
-FROM cutomers
+FROM customers
 ORDER BY 
 	country ASC,
 	score DESC;
