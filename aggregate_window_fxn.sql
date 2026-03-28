@@ -75,10 +75,83 @@ ROUND(
 	(CAST(o.sales AS DECIMAL(10,2))/SUM(o.sales) OVER()) *100,
 	2
 ) AS percentage_of_total
-FROM salesdb.orders o
+FROM salesdb.orders o;
 
 -- AVg() 
 -- find the average sale for the each product, while keeping order level details
+SELECT 
+o.orderid,
+o.productid,
+o.sales,
+AVG(o.sales) OVER(PARTITION BY o.productid) AS avg_sales_perproduct
+FROM salesdb.orders o;
+
+-- NULL handling 
+SELECT 
+o.orderid,
+o.productid,
+o.sales,
+AVG(COALESCE(o.sales)) OVER(PARTITION BY o.productid) AS avg_sales_perproduct
+FROM salesdb.orders o;
+
+-- FIND THE OVERALL AVERAFE SALES 
+SELECT
+o.orderid,
+o.orderdate,
+o.sales,
+AVG(o.sales) OVER() avg_overallSales
+FROM salesdb.orders o;
+
+-- find the average customer score, showing customer details
+SELECT
+c.firstname,
+c.score,
+AVG(c.score) OVER() AS avg_customer_score
+FROM salesdb.customers c;
+
+-- comparison analysis 
+-- find all orders where sales > average sales
+SELECT *
+FROM(
+SELECT
+o.orderid,
+o.productid,
+o.sales,
+AVG(o.sales) OVER() AS avg_sales
+FROM salesdb.orders o
+) AS sub 
+WHERE sales > avg_sales;
+
+-- find the maximum and minimum sales for each product,
+SELECT
+o.orderid,
+o.productid,
+o.sales,
+MAX(o.sales) OVER(PARTITION BY o.productid) AS max_sales,
+MIN(o.sales) OVER(PARTITION BY o.productid) AS min_sales
+FROM salesdb.orders o;
+
+-- show employees who have the highest salary
+SELECT *
+FROM(
+SELECT
+e.employeeid,
+e.firstname,
+e.salary,
+MAX(e.salary) OVER() AS HIGHEST_SAL
+FROM salesdb.employees e
+) AS sub
+WHERE salary = HIGHEST_SAL;
+
+-- measure how far each sale is from minimum and maximum
+SELECT
+o.orderid,
+o.sales,
+o.sales - MIN(o.sales) OVER() AS deviation_from_min,
+MAX(o.sales) OVER()  -  o.sales AS deviation_from_max  
+FROM salesdb.orders o;
+
+
 
 
 
